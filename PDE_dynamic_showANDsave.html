@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Equation Shower</title>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML"></script>
+        <style>
+            .equation {
+            font-size: 18px;
+            margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Equation Shower</h1>
+
+        <form id="equationForm">
+            <label for="variableCount">Number of Independent Variables:</label>
+            <input type="number" id="variableCount" name="variableCount" min="1" onChange="generateVariableDescriptions()"><br>
+            <div id="variableDescriptions"></div><br>
+
+            <label for="componentCount">Number of Field Components:</label>
+            <input type="number" id="componentCount" name="componentCount" min="1" onChange="generateComponentDescriptions()"><br>
+            <div id="componentDescriptions"></div><br>
+
+            <label for="equationCount">Number of PDEs:</label>
+            <select id="equationCount" name="equationCount">
+                <option value="0">-</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select><br><br>
+
+            <div id="equationInputs"></div><br>
+
+            <input type="submit" value="Show Equations">
+        </form>
+    
+        <div id="equationResult"></div>
+    
+        <button id="saveButton">Save Equations</button>
+    
+        <script>
+            document.getElementById("equationForm").addEventListener("submit", function(event) {
+                event.preventDefault();
+            
+                var equationCount = parseInt(document.getElementById("equationCount").value);
+                var equationInputs = document.getElementsByClassName("equationInput");
+                
+                var equations = [];
+                for (var i = 0; i < equationCount; i++) {
+                    var termCount = parseInt(equationInputs[i].querySelector(".termCountInput").value);
+                    
+                    var equation = generateEquation(i, termCount);
+                    equations.push(equation);
+                }
+            
+                var equationResult = document.getElementById("equationResult");
+                equationResult.innerHTML = "";
+                
+                var equationHtml = "";
+                for (var i = 0; i < equationCount; i++) {
+                    equationHtml += "<div class=\"equation\">\\(" + equations[i] + "\\)</div>";
+                }
+                
+                equationResult.innerHTML = equationHtml;
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, equationResult]);
+            });
+        
+            document.getElementById("equationCount").addEventListener("change", function() {
+                var equationCount = parseInt(this.value);
+                var equationInputs = document.getElementById("equationInputs");
+                
+                equationInputs.innerHTML = "";
+                
+                for (var i = 0; i < equationCount; i++) {
+                    var equationInput = document.createElement("div");
+                    equationInput.classList.add("equationInput");
+                    
+                    equationInput.innerHTML = `
+                        <h2>Equation ${i+1}</h2>
+                        <label for="termCountInput${i}">Number of Linear Terms in Equation ${i+1}:</label>
+                        <input type="number" id="termCountInput${i}" name="termCountInput${i}" class="termCountInput" min="1" onChange="generateTermInputs(${i})"><br>
+                        <div id="termInputs${i}"></div>
+                    `;
+                    equationInputs.appendChild(equationInput);
+                }
+            });
+
+            document.getElementById("saveButton").addEventListener("click", function() {
+                var equationCount = parseInt(document.getElementById("equationCount").value);
+                var equationInputs = document.getElementsByClassName("equationInput");
+
+                saveCoefficients(equationCount, equationInputs);
+            });
+        </script>
+        <script src="generateAdditionalInputs.js"></script>
+        <script src="generateComponentDescriptions.js"></script>
+        <script src="generateVariableDescriptions.js"></script>
+        <script src="generateEquation.js"></script>
+        <script src="generateTermInputs.js"></script>
+        <script src="saveCoefficients.js"></script>
+    </body>
+</html>
